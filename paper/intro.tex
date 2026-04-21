@@ -1,0 +1,17 @@
+\section{Introduction}
+
+Coordinated multi-point transmission and network MIMO can substantially improve spectral efficiency in interference-limited cellular systems, but the classical fully coordinated formulation requires network-wide channel-state information (CSI) exchange and centralized optimization \cite{Gesbert10}. These requirements become increasingly costly as the number of cells grows, motivating architectures that preserve the dominant coordination gains while restricting signaling to geographically local interactions.
+
+In practical deployments, interference is often spatially local because path loss attenuates distant links faster than nearby ones. This observation suggests that distributed beamforming should exploit locality explicitly, rather than treating all interference couplings as equally important. Existing distributed optimization methods have shown that weighted sum-rate maximization can be decomposed into tractable iterative subproblems \cite{Shi11}, yet many localized schemes do not make the asymptotic relationship between neighborhood size and global optimality explicit.
+
+Early work on distributed base-station cooperation considered structured linear precoding combined with distributed resource allocation. In particular, Jungnickel et al. proposed block-diagonalization together with dual decomposition for cooperative multi-cell transmission under local power constraints. While that framework demonstrated the potential of distributed coordination, it relied on fixed interference-nulling precoders and did not characterize how localized cooperation approaches the fully coordinated optimum as cooperation neighborhoods expand. The present work builds directly on that direction by enabling localized joint beamforming and power control with asymptotic optimality guarantees \cite{Jungnickel08}.
+
+The main idea in this paper is to define a cooperation neighborhood $\mathcal{C}_b(\rho)$ for each base station $b$, where only links and variables within radius $\rho$ participate in local beamformer updates, dual updates, and interference-price exchange. As $\rho$ grows, the approximation captures more of the true global coupling structure. Under spatial decay, the ignored far-field interference terms vanish at a quantifiable rate, which yields a convergence result for the localized optimum and for approximate algorithmic solutions.
+
+This paper makes four contributions:
+\begin{enumerate}
+  \item We formulate localized cooperative beamforming as a radius-dependent approximation to the globally coordinated weighted sum-rate problem.
+  \item We develop a distributed joint beamforming and power control algorithm, termed localized distributed beamforming and power allocation (LDBPA), that only exchanges messages inside the chosen cooperation neighborhood.
+  \item We provide an optimality-gap theorem showing that the best localized objective value approaches the global optimum as $\rho$ increases.
+  \item We present simulation benchmarks on multi-cell layouts, comparing localized coordination against non-cooperative and globally coordinated baselines.
+\end{enumerate}

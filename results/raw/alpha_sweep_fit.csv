@@ -1,0 +1,4 @@
+alpha,empirical_loglog_slope,predicted_upper_bound_exponent,ring_radius,num_bs,users_per_bs,trials
+3.0,-2.367335781697715,-1.0,3,37,2,4
+3.6,-2.9627531076001152,-1.6,3,37,2,4
+4.2,-3.1814394498562786,-2.2,3,37,2,4

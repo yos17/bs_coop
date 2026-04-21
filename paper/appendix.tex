@@ -1,0 +1,157 @@
+\section{Proof of the Locality Gap Bounds}
+
+For any feasible beamformer collection $\mathbf{W}$ and user $k$, define the far-field interference omitted by the radius-$\rho$ surrogate as
+\begin{equation}
+\Delta I_k^{(\rho)}(\mathbf{W}) =
+\sum_{c \notin \mathcal{C}_{b(k)}(\rho)}
+\sum_{u \in \mathcal{U}_c}
+\left| \vect{h}_{k,c}^{\herm} \vect{w}_{c,u} \right|^2.
+\label{eq:far_field_def}
+\end{equation}
+
+\subsection{Uniform Far-Field Interference Bound}
+
+By Cauchy--Schwarz and Assumption 2,
+\begin{align}
+\Delta I_k^{(\rho)}(\mathbf{W})
+&\le
+\sum_{c \notin \mathcal{C}_{b(k)}(\rho)}
+\norm{\vect{h}_{k,c}}^2
+\sum_{u \in \mathcal{U}_c} \norm{\vect{w}_{c,u}}^2 \nonumber \\
+&\le
+C_h P_{\max}
+\sum_{c \notin \mathcal{C}_{b(k)}(\rho)}
+\bigl(1 + d(k,c)\bigr)^{-\alpha}.
+\label{eq:far_field_first}
+\end{align}
+Let $\mathcal{S}_m(k)$ denote the set of base stations whose distance from user $k$ lies in $[m,m+1)$. Assumption 3 gives $|\mathcal{S}_m(k)| \le C_s(1+m)$, and therefore
+\begin{align}
+\Delta I_k^{(\rho)}(\mathbf{W})
+&\le
+C_h P_{\max} \sum_{m=\lceil \rho \rceil}^{\infty}
+|\mathcal{S}_m(k)| (1+m)^{-\alpha} \nonumber \\
+&\le
+C_h P_{\max} C_s
+\sum_{m=\lceil \rho \rceil}^{\infty}
+(1+m)^{1-\alpha}.
+\end{align}
+Since $\alpha > 2$, the tail of the convergent series satisfies
+\begin{equation}
+\sum_{m=\lceil \rho \rceil}^{\infty}
+(1+m)^{1-\alpha}
+\le
+\int_{\rho}^{\infty} (1+x)^{1-\alpha}\,dx
+=
+\frac{(1+\rho)^{2-\alpha}}{\alpha - 2}.
+\end{equation}
+Hence there exists a constant $K_I > 0$ such that
+\begin{equation}
+\Delta I_k^{(\rho)}(\mathbf{W}) \le K_I \rho^{2-\alpha}
+\label{eq:far_field_tail}
+\end{equation}
+uniformly over all feasible $\mathbf{W}$, users $k$, and radii $\rho \ge 1$.
+
+\subsection{Uniform Objective Perturbation Bound}
+
+Write the exact rate of user $k$ as
+\begin{equation}
+R_k(\mathbf{W}) =
+\log_2 \left( 1 + \frac{S_k(\mathbf{W})}{I_k^{\mathrm{near}}(\mathbf{W}) + \Delta I_k^{(\rho)}(\mathbf{W}) + \sigma_k^2} \right),
+\end{equation}
+where $S_k(\mathbf{W})$ is the desired signal power and $I_k^{\mathrm{near}}(\mathbf{W})$ collects the interference terms retained by the surrogate. The optimistic surrogate rate is
+\begin{equation}
+\widetilde{R}_k^{(\rho)}(\mathbf{W}) =
+\log_2 \left( 1 + \frac{S_k(\mathbf{W})}{I_k^{\mathrm{near}}(\mathbf{W}) + \sigma_k^2} \right).
+\end{equation}
+Because omitted interference only decreases the denominator,
+\begin{equation}
+\widetilde{R}_k^{(\rho)}(\mathbf{W}) - R_k(\mathbf{W}) \ge 0.
+\end{equation}
+Moreover,
+\begin{align}
+\widetilde{R}_k^{(\rho)}(\mathbf{W}) - R_k(\mathbf{W})
+&=
+\log_2 \frac{S_k + I_k^{\mathrm{near}} + \sigma_k^2}{I_k^{\mathrm{near}} + \sigma_k^2}
+-
+\log_2 \frac{S_k + I_k^{\mathrm{near}} + \Delta I_k^{(\rho)} + \sigma_k^2}
+{I_k^{\mathrm{near}} + \Delta I_k^{(\rho)} + \sigma_k^2}
+\nonumber \\
+&\le
+\log_2 \left(
+\frac{I_k^{\mathrm{near}} + \Delta I_k^{(\rho)} + \sigma_k^2}
+{I_k^{\mathrm{near}} + \sigma_k^2}
+\right)
+\nonumber \\
+&=
+\log_2 \left(
+1 + \frac{\Delta I_k^{(\rho)}(\mathbf{W})}
+{I_k^{\mathrm{near}}(\mathbf{W}) + \sigma_k^2}
+\right)
+\nonumber \\
+&\le
+\frac{\Delta I_k^{(\rho)}(\mathbf{W})}{\ln 2 \, \sigma_{\min}^2}.
+\label{eq:rate_perturb}
+\end{align}
+Combining \eqref{eq:far_field_tail} and \eqref{eq:rate_perturb} yields
+\begin{equation}
+0 \le \widetilde{R}_k^{(\rho)}(\mathbf{W}) - R_k(\mathbf{W})
+\le
+\frac{K_I}{\ln 2 \, \sigma_{\min}^2} \rho^{2-\alpha}.
+\end{equation}
+Summing over users gives a constant $K_F > 0$ such that
+\begin{equation}
+0 \le \widetilde{F}^{(\rho)}(\mathbf{W}) - F(\mathbf{W})
+\le
+K_F \rho^{2-\alpha}
+\label{eq:objective_perturb}
+\end{equation}
+uniformly over the feasible set.
+
+\subsection{Proof of Theorem 1}
+
+Let $\mathbf{W}^{\star}$ maximize $F(\mathbf{W})$, and let $\mathbf{W}_{\rho}^{\star}$ maximize $\widetilde{F}^{(\rho)}(\mathbf{W})$. Using \eqref{eq:objective_perturb},
+\begin{align}
+F^{\star}
+=
+F(\mathbf{W}^{\star})
+&\le
+\widetilde{F}^{(\rho)}(\mathbf{W}^{\star}) \nonumber \\
+&\le
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\star}) \nonumber \\
+&\le
+F(\mathbf{W}_{\rho}^{\star}) + K_F \rho^{2-\alpha}
+=
+\widehat{F}_{\rho}^{\star} + K_F \rho^{2-\alpha}.
+\end{align}
+Rearranging proves
+\begin{equation}
+0 \le F^{\star} - \widehat{F}_{\rho}^{\star} \le K_F \rho^{2-\alpha},
+\end{equation}
+which is \eqref{eq:localized_true_gap}.
+
+\subsection{Proof of Theorem 2}
+
+Let $\mathbf{W}_{\rho}^{\dagger}$ satisfy
+\begin{equation}
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\star}) -
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\dagger}) \le \delta_{\rho}.
+\end{equation}
+Then
+\begin{align}
+F^{\star}
+&\le
+\widetilde{F}^{(\rho)}(\mathbf{W}^{\star}) \nonumber \\
+&\le
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\star}) \nonumber \\
+&\le
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\dagger}) + \delta_{\rho} \nonumber \\
+&\le
+F(\mathbf{W}_{\rho}^{\dagger}) + K_F \rho^{2-\alpha} + \delta_{\rho}.
+\end{align}
+Therefore,
+\begin{equation}
+0 \le F^{\star} - F(\mathbf{W}_{\rho}^{\dagger})
+\le
+K_F \rho^{2-\alpha} + \delta_{\rho},
+\end{equation}
+which proves \eqref{eq:localized_algorithm_gap}.

@@ -1,0 +1,59 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsmath,amssymb,amsthm,bm,mathtools}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{url}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\herm}{\mathrm{H}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\safeincludegraphics}[2][]{%
+  \IfFileExists{#2}{%
+    \includegraphics[#1]{#2}%
+  }{%
+    \fbox{%
+      \parbox[c][1.5in][c]{0.95\linewidth}{%
+        \centering
+        Placeholder figure. Run\\
+        \texttt{python ../code/plot_results.py}
+      }%
+    }%
+  }%
+}
+
+\title{Asymptotically Optimal Localized Distributed Beamforming via Expanding Cooperation Neighborhoods}
+
+\author{
+\IEEEauthorblockN{Anonymous Research Draft}
+\IEEEauthorblockA{Prepared for reproducible repository development}
+}
+
+\begin{document}
+
+\maketitle
+
+\input{abstract}
+\input{intro}
+\input{related_work}
+\input{system_model}
+\input{algorithm}
+\input{theorem}
+\input{simulations}
+\input{conclusion}
+\appendices
+\input{appendix}
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

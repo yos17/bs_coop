@@ -1,0 +1,51 @@
+\section{Simulations}
+
+The simulation code in the repository evaluates the proposed method on a seven-cell hexagonal layout with one or two users per base station, together with a larger locality-scaling study on a $37$-base-station hexagonal layout. Channels follow independent Rayleigh fading with path-loss exponent $\alpha$, and each base station obeys a sum-power constraint. The compared schemes are: non-cooperative transmission, LDBPA with $\rho \in \{1,2,3\}$, and a globally coordinated benchmark.
+
+The experiments track weighted sum-rate, runtime, signaling messages, iteration count, and the true gap to the globally coordinated solution. For reproducibility, all Monte Carlo trials use deterministic seeds and export raw CSV data under `results/raw/`. Publication figures are generated in both PNG and PDF formats under `results/figs/` and mirrored into `paper/figs/`.
+
+Fig.~\ref{fig:sumrate} shows weighted sum-rate versus cooperation radius on the seven-cell layout. Fig.~\ref{fig:gap} reports the corresponding gap to the global benchmark, while Fig.~\ref{fig:runtime} and Fig.~\ref{fig:signaling} summarize the runtime and coordination overhead trends. The larger $37$-cell study directly tests the locality theorem: the mean true gap falls from $18.70$ at $\rho=1$ to $0.24$ at $\rho=5$, and the measured log-log slope is approximately $-2.63$ versus the reference exponent $2-\alpha=-1.6$. This steeper empirical decay is consistent with the theorem because $\rho^{2-\alpha}$ is an upper-bound envelope rather than an exact asymptotic equality.
+
+An additional robustness study varies the path-loss exponent across $\alpha \in \{3.0, 3.6, 4.2\}$ on the same $37$-base-station layout. The absolute gap curves do not need to order perfectly at the smallest neighborhood because the global benchmark itself changes with $\alpha$ and the nonconvex local solver may settle at different stationary points. Nevertheless, the overall locality trend strengthens with faster spatial decay: at $\rho=5$, the mean relative gap drops from approximately $0.35\%$ for $\alpha=3.0$ to $0.09\%$ for $\alpha=4.2$, and the empirical log-log slopes are about $-2.37$, $-2.96$, and $-3.18$, respectively. These results support the theorem's qualitative message that stronger decay makes localized cooperation more effective.
+
+\begin{figure}[t]
+  \centering
+  \safeincludegraphics[width=\linewidth]{figs/sum_rate_vs_rho.pdf}
+  \caption{Weighted sum-rate as the cooperation radius grows.}
+  \label{fig:sumrate}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \safeincludegraphics[width=\linewidth]{figs/gap_to_global_vs_rho.pdf}
+  \caption{Gap to the globally coordinated benchmark versus cooperation radius.}
+  \label{fig:gap}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \safeincludegraphics[width=\linewidth]{figs/runtime_vs_bs.pdf}
+  \caption{Runtime scaling with the number of base stations.}
+  \label{fig:runtime}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \safeincludegraphics[width=\linewidth]{figs/signaling_vs_rho.pdf}
+  \caption{Coordination-message count versus cooperation radius.}
+  \label{fig:signaling}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \safeincludegraphics[width=\linewidth]{figs/locality_gap_scaling.pdf}
+  \caption{True global-objective gap versus cooperation radius on the $37$-base-station locality-scaling study.}
+  \label{fig:locality_scaling}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \safeincludegraphics[width=\linewidth]{figs/alpha_sweep_gap_scaling.pdf}
+  \caption{Effect of the path-loss exponent on the locality gap. Larger $\alpha$ yields faster decay of the true gap as the cooperation radius grows.}
+  \label{fig:alpha_scaling}
+\end{figure}

@@ -1,0 +1,66 @@
+\section{Optimality Gap Under Expanding Neighborhoods}
+
+The localized algorithm is driven by a truncated, and therefore optimistic, surrogate objective. To separate the surrogate from the true network utility, define
+\begin{equation}
+\widetilde{F}^{(\rho)}(\mathbf{W}) = \sum_{k \in \mathcal{K}} \alpha_k \widetilde{R}_k^{(\rho)}(\mathbf{W}),
+\end{equation}
+where $\widetilde{R}_k^{(\rho)}$ drops far-field interference terms outside $\mathcal{C}_{b(k)}(\rho)$ without adding a residual correction. Let
+\begin{equation}
+\label{eq:localized_optimizer_def}
+\mathbf{W}_{\rho}^{\star} \in \arg \max_{\mathbf{W}} \widetilde{F}^{(\rho)}(\mathbf{W}),
+\qquad
+\widehat{F}_{\rho}^{\star} := F(\mathbf{W}_{\rho}^{\star}),
+\end{equation}
+and let $F^{\star} := \max_{\mathbf{W}} F(\mathbf{W})$. Thus $\widehat{F}_{\rho}^{\star}$ is the \emph{true} weighted sum-rate attained by an optimizer of the localized surrogate.
+
+\begin{assumption}
+There exist constants $C_h > 0$ and $\alpha > 2$ such that
+\begin{equation}
+\norm{\vect{h}_{k,b}}^2 \le C_h \bigl(1 + d(k,b)\bigr)^{-\alpha}
+\end{equation}
+for every user $k$ and base station $b$.
+\end{assumption}
+
+\begin{assumption}
+The feasible beamformers satisfy $\sum_{u \in \mathcal{U}_b} \norm{\vect{w}_{b,u}}^2 \le P_b$ for every $b$, and $P_{\max} := \max_b P_b < \infty$.
+\end{assumption}
+
+\begin{assumption}
+The network geometry has bounded shell growth: there exists $C_s > 0$ such that the number of base stations with distance in $[m,m+1)$ from any user location is at most $C_s(1+m)$ for every integer $m \ge 0$.
+\end{assumption}
+
+\begin{assumption}
+The noise powers satisfy $\sigma_k^2 \ge \sigma_{\min}^2 > 0$ for all users.
+\end{assumption}
+
+\begin{theorem}
+Under Assumptions 1--4, there exists a constant $K > 0$, independent of $\rho$, such that
+\begin{equation}
+0 \le F^{\star} - \widehat{F}_{\rho}^{\star} \le K \rho^{2-\alpha}.
+\label{eq:localized_true_gap}
+\end{equation}
+Consequently,
+\begin{equation}
+\lim_{\rho \rightarrow \infty} \widehat{F}_{\rho}^{\star} = F^{\star}.
+\end{equation}
+\end{theorem}
+
+\begin{theorem}
+Suppose the distributed algorithm returns $\mathbf{W}_{\rho}^{\dagger}$ satisfying
+\begin{equation}
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\star}) -
+\widetilde{F}^{(\rho)}(\mathbf{W}_{\rho}^{\dagger}) \le \delta_{\rho}.
+\end{equation}
+Then, under the same assumptions, there exists a constant $K > 0$ such that
+\begin{equation}
+0 \le F^{\star} - F(\mathbf{W}_{\rho}^{\dagger}) \le K \rho^{2-\alpha} + \delta_{\rho}.
+\label{eq:localized_algorithm_gap}
+\end{equation}
+In particular, if $\delta_{\rho} \to 0$ as $\rho \to \infty$, then $F(\mathbf{W}_{\rho}^{\dagger}) \to F^{\star}$.
+\end{theorem}
+
+\emph{Proof idea:}
+Assumptions 1--3 imply that the omitted far-field interference tail is uniformly bounded by $K_I \rho^{2-\alpha}$ over the feasible set. Assumption 4 converts that interference perturbation into a uniform rate perturbation bound $0 \le \widetilde{F}^{(\rho)}(\mathbf{W}) - F(\mathbf{W}) \le K \rho^{2-\alpha}$. Evaluating the global optimizer inside the surrogate objective and then evaluating the surrogate optimizer in the true objective yields \eqref{eq:localized_true_gap}; adding the local solution error $\delta_{\rho}$ yields \eqref{eq:localized_algorithm_gap}. Full details are given in Appendix~A.
+
+\emph{Remark:}
+If the localized model adds a conservative residual term $\eta_k^{(\rho)}$ that upper-bounds omitted far-field interference uniformly over the feasible set, then the resulting localized objective becomes a lower bound on $F(\mathbf{W})$. In that conservative variant, the surrogate optimum itself satisfies the more classical bound $0 \le F^{\star} - F_{\rho}^{\star} \le K \rho^{2-\alpha}$.

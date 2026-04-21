@@ -1,0 +1,62 @@
+\section{Localized Distributed Beamforming and Power Allocation}
+
+We propose an iterative LDBPA scheme that mirrors the WMMSE decomposition while restricting message exchange to the neighborhood $\mathcal{C}_b(\rho)$. The algorithm maintains beamformers $\{\vect{w}_{b,u}\}$, receiver filters $\{g_k\}$, MSE weights $\{v_k\}$, power dual variables $\{\lambda_{b,q}\}$, and interference prices $\{\pi_k\}$.
+
+For user $k$, define the effective received power
+\begin{equation}
+T_k(\mathbf{W}) = \sum_{c \in \mathcal{B}} \sum_{u \in \mathcal{U}_c}
+\left| \vect{h}_{k,c}^{\herm} \vect{w}_{c,u} \right|^2 + \sigma_k^2.
+\end{equation}
+The MMSE receiver update is
+\begin{equation}
+g_k =
+\frac{\vect{h}_{k,b(k)}^{\herm} \vect{w}_{b(k),k}}
+{T_k(\mathbf{W})}.
+\end{equation}
+Using the scalar MSE expression
+\begin{equation}
+e_k = 1 - 2 \Re \left\{ g_k^{*}\vect{h}_{k,b(k)}^{\herm} \vect{w}_{b(k),k} \right\}
++ |g_k|^2 T_k(\mathbf{W}),
+\end{equation}
+the weight update is
+\begin{equation}
+v_k = \frac{1}{e_k}.
+\end{equation}
+
+For each base station $b$, define the local matrix
+\begin{align}
+\mathbf{A}_b^{(\rho)} &=
+\sum_{k : b(k) \in \mathcal{C}_b(\rho)}
+\alpha_k v_k |g_k|^2 \vect{h}_{k,b} \vect{h}_{k,b}^{\herm} \nonumber \\
+&\quad + \sum_q \lambda_{b,q} \mathbf{E}_{b,q}
++ \sum_{k : b(k) \in \mathcal{C}_b(\rho)} \pi_k \vect{h}_{k,b} \vect{h}_{k,b}^{\herm}.
+\label{eq:Ab}
+\end{align}
+Then the beamformer for user $u \in \mathcal{U}_b$ is updated as
+\begin{equation}
+\vect{w}_{b,u} = \left(\mathbf{A}_b^{(\rho)}\right)^{-1}
+\left(\alpha_u v_u g_u^{*} \vect{h}_{u,b}\right).
+\label{eq:beamformer_update}
+\end{equation}
+
+The power dual variables follow projected subgradient updates,
+\begin{equation}
+\lambda_{b,q}^{+} =
+\max \left(0, \lambda_{b,q} + \gamma \bigl(P_{b,q}^{\mathrm{used}} - P_{b,q}\bigr)\right),
+\end{equation}
+and the interference prices are updated as
+\begin{equation}
+\pi_k^{+} =
+\max \left(0, \pi_k + \eta \bigl(I_k^{\mathrm{local}} - \bar{I}_k\bigr)\right),
+\end{equation}
+where $\bar{I}_k$ is a local interference budget. Only the receiver scalars, MSE weights, prices, and dual variables for users and base stations inside $\rho$ are exchanged.
+
+The resulting iteration is:
+\begin{enumerate}
+  \item Each user computes its MMSE receiver $g_k$.
+  \item Each user updates its weight $v_k = 1 / e_k$.
+  \item Each base station forms $\mathbf{A}_b^{(\rho)}$ from locally exchanged quantities and updates $\vect{w}_{b,u}$ for $u \in \mathcal{U}_b$.
+  \item Each base station updates its power dual variables.
+  \item Each user updates its interference price and broadcasts it only within the neighborhood.
+\end{enumerate}
+The process repeats until the weighted sum-rate or iterate difference changes by less than a tolerance.
