@@ -37,10 +37,11 @@ def run_ldbpa(
     num_bs = network["num_bs"]
     num_users = network["num_users"]
     antenna_count = network["antenna_count"]
+    streams_per_user = network["streams_per_user"]
 
     served_users = served_user_lists(user_bs, num_bs)
     neighborhood_sets = neighborhoods(bs_positions, rho)
-    beamformers = initialize_beamformers(channels, user_bs, power_limits)
+    beamformers = initialize_beamformers(channels, user_bs, power_limits, streams_per_user)
     lambdas = np.zeros(num_bs, dtype=float)
     prices = np.zeros(num_users, dtype=float)
 
@@ -49,40 +50,45 @@ def run_ldbpa(
 
     for iteration in range(1, max_iters + 1):
         metrics = compute_user_metrics(beamformers, channels, user_bs, noise_power, weights)
-        desired_complex = metrics["desired_complex"]
-        total_power = metrics["total_power"]
-
-        receivers = desired_complex / np.maximum(total_power, 1e-12)
-        mse = 1.0 - 2.0 * np.real(np.conjugate(receivers) * desired_complex) + (np.abs(receivers) ** 2) * total_power
-        mse_weights = 1.0 / np.maximum(mse, 1e-9)
+        receivers = metrics["receivers"]
+        mse_matrices = metrics["mse_matrices"]
+        weight_matrices = np.zeros_like(mse_matrices)
+        identity_d = np.eye(streams_per_user, dtype=np.complex128)
+        for user in range(num_users):
+            weight_matrices[user] = np.linalg.inv(mse_matrices[user] + 1e-9 * identity_d)
 
         updated_beamformers = np.zeros_like(beamformers)
         for bs_idx in range(num_bs):
             local_users = np.flatnonzero(np.isin(user_bs, neighborhood_sets[bs_idx]))
             local_matrix = np.zeros((antenna_count, antenna_count), dtype=np.complex128)
             for user in local_users:
-                channel_vec = channels[user, bs_idx, :]
-                outer = np.outer(channel_vec, np.conjugate(channel_vec))
-                local_matrix += weights[user] * mse_weights[user] * (np.abs(receivers[user]) ** 2) * outer
-                local_matrix += prices[user] * outer
+                channel_matrix = channels[user, bs_idx, :, :]
+                local_matrix += weights[user] * (
+                    channel_matrix.conj().T
+                    @ receivers[user]
+                    @ weight_matrices[user]
+                    @ receivers[user].conj().T
+                    @ channel_matrix
+                )
+                local_matrix += prices[user] * (channel_matrix.conj().T @ channel_matrix)
             local_matrix += (lambdas[bs_idx] + 1e-6) * np.eye(antenna_count)
 
             for user in served_users[bs_idx]:
-                drive = weights[user] * mse_weights[user] * np.conjugate(receivers[user]) * channels[user, bs_idx, :]
-                updated_beamformers[bs_idx, user, :] = solve(local_matrix, drive, assume_a="her")
+                channel_matrix = channels[user, bs_idx, :, :]
+                drive = weights[user] * (channel_matrix.conj().T @ receivers[user] @ weight_matrices[user])
+                updated_beamformers[bs_idx, user, :, :] = solve(local_matrix, drive, assume_a="her")
 
             used_power = per_bs_power(updated_beamformers)[bs_idx]
             if used_power > power_limits[bs_idx]:
-                updated_beamformers[bs_idx, served_users[bs_idx], :] *= np.sqrt(power_limits[bs_idx] / used_power)
+                updated_beamformers[bs_idx, served_users[bs_idx], :, :] *= np.sqrt(power_limits[bs_idx] / used_power)
 
         used_power = per_bs_power(updated_beamformers)
         lambdas = np.maximum(0.0, lambdas + lambda_step * (used_power - power_limits))
 
-        leakage = far_field_leakage(updated_beamformers, channels, user_bs, neighborhood_sets)
-        leakage_budget = interference_budget_scale * noise_power * np.ones(num_users, dtype=float)
-        prices = np.maximum(0.0, prices + price_step * (leakage - leakage_budget))
-
         new_metrics = compute_user_metrics(updated_beamformers, channels, user_bs, noise_power, weights)
+        leakage = far_field_leakage(new_metrics["responses"], user_bs, neighborhood_sets)
+        leakage_budget = interference_budget_scale * np.maximum(new_metrics["noise_after_combining"], 1e-12)
+        prices = np.maximum(0.0, prices + price_step * (leakage - leakage_budget))
         relative_change = np.linalg.norm(updated_beamformers - beamformers) / max(np.linalg.norm(beamformers), 1e-12)
         history.append(
             {

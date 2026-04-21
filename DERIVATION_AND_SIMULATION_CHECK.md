@@ -55,7 +55,7 @@ $$
 \sum_{u \in U_b} \|w_{b,u}\|^2 \le P_b.
 $$
 
-This is the successor to the 2008 Jungnickel-style decomposition:
+This is the successor to the 2008 Hadisusanto-style decomposition:
 
 - 2008 predecessor: fixed BD precoders + distributed power allocation
 - successor here: localized adaptive beamforming + distributed power control
@@ -135,6 +135,64 @@ $$
 \widehat{F}_\rho^\star := F(W_\rho^\star).
 $$
 
+The cleanest statement separates the exact finite-network identity from the asymptotic decay bound.
+
+### 4.1 Theorem: Finite-Network Exact Equality
+
+Let the set of base stations be finite and define the network diameter
+
+$$
+D_{\mathrm{net}} := \max_{b,c \in \mathcal{B}} d(b,c).
+$$
+
+Then for every `rho >= D_net`, the localized problem is exactly the global problem.
+
+#### Proof
+
+If `rho >= D_net`, then for every base station `b`,
+
+$$
+\mathcal{C}_b(\rho) = \mathcal{B}.
+$$
+
+Therefore no interference terms are omitted, so for every feasible beamformer collection `W`,
+
+$$
+\widetilde{F}^{(\rho)}(W) = F(W).
+$$
+
+Since the feasible set is also unchanged, the localized and global optimization problems are identical. Hence:
+
+$$
+\widehat{F}_\rho^\star = F^\star
+\qquad \text{for all } \rho \ge D_{\mathrm{net}}.
+$$
+
+This is the rigorous version of the statement
+
+> as local cooperation reaches the whole network, local cooperation equals global cooperation.
+
+Once every neighborhood contains every base station, the localized model has the same variables, same interference terms, and same feasible set as the global model. So the two optimization problems are identical.
+
+### 4.2 Corollary: `rho -> infinity` Implies Local = Global
+
+Because the network is finite, `D_net < infinity`. Therefore there exists a finite threshold `rho_0 = D_net` such that
+
+$$
+\widehat{F}_\rho^\star = F^\star
+\qquad \text{for all } \rho \ge \rho_0.
+$$
+
+Hence
+
+$$
+\lim_{\rho \to \infty} \widehat{F}_\rho^\star = F^\star.
+$$
+
+So on a finite network, exact equality happens before the limit: once `rho` reaches the network diameter, local cooperation and global cooperation are literally the same thing.
+
+### 4.3 Theorem: Asymptotic Decay Bound For Expanding Networks
+
 Assume:
 
 1. Path-loss decay:
@@ -188,6 +246,34 @@ $$
 $$
 
 So if `delta_rho -> 0`, then the algorithmic solution also approaches the global optimum.
+
+### 4.4 Extension To Fully MIMO Multi-Stream Users
+
+The same logic carries over to the fully MIMO model used in the 2008 paper. Let user `k` have receive-channel blocks `H_{k,b}` and let BS `b` transmit to user `u` with a beamforming matrix `V_{b,u}` carrying `d_u` streams.
+
+The omitted far-field term is now an interference covariance tail,
+
+$$
+\Delta \Sigma_k^{(\rho)}(V)
+=
+\sum_{c \notin \mathcal{C}_{b(k)}(\rho)}
+\sum_u
+H_{k,c} V_{c,u} V_{c,u}^H H_{k,c}^H.
+$$
+
+If the channel matrices satisfy the same spatial decay bound in Frobenius norm and the feasible beamformers are uniformly bounded, then
+
+$$
+\|\Delta \Sigma_k^{(\rho)}(V)\|_2 = O(\rho^{2-\alpha}).
+$$
+
+The user-rate expression in the MIMO case,
+
+$$
+R_k(V) = \log_2 \det \left(I + S_k(V)\Sigma_k(V)^{-1}\right),
+$$
+
+is still a continuous monotone function of the interference covariance. So the finite-network equality result and the asymptotic `O(\rho^{2-\alpha})` gap bound both extend to the multi-stream MIMO setting.
 
 ## 5. Why The Bound Works
 
@@ -282,50 +368,52 @@ Yes, on the true objective.
 
 From [results/raw/locality_scaling_summary.csv](/Users/yosia/Desktop/ideas/bs_coop/results/raw/locality_scaling_summary.csv), the 37-BS / 2-user-per-BS study gives:
 
-| rho | mean weighted sum-rate | mean gap to global |
+| rho | mean weighted sum-rate | mean gap to full-neighborhood |
 | --- | ---: | ---: |
-| 1 | 76.70 | 18.70 |
-| 2 | 89.66 | 5.74 |
-| 3 | 93.38 | 2.02 |
-| 4 | 94.73 | 0.67 |
-| 5 | 95.16 | 0.24 |
+| 1 | 118.05 | 11.90 |
+| 2 | 127.00 | 2.95 |
+| 3 | 128.61 | 1.34 |
+| 4 | 129.48 | 0.47 |
+| 5 | 129.75 | 0.20 |
 
 So the true gap drops sharply as `rho` grows.
 
 From [results/raw/locality_scaling_fit.csv](/Users/yosia/Desktop/ideas/bs_coop/results/raw/locality_scaling_fit.csv):
 
-- empirical log-log slope: `-2.6345`
+- empirical log-log slope: `-2.4638`
 - reference exponent `2 - alpha` with `alpha = 3.6`: `-1.6`
 
 This is consistent with the theorem. The theorem gives an upper-bound envelope, not an exact equality.
 
 ### 7.2 Robustness to path-loss exponent
 
-From [results/raw/alpha_sweep_summary.csv](/Users/yosia/Desktop/ideas/bs_coop/results/raw/alpha_sweep_summary.csv), the mean gap-to-global curves for `alpha in {3.0, 3.6, 4.2}` all shrink rapidly with `rho`.
+From [results/raw/alpha_sweep_summary.csv](/Users/yosia/Desktop/ideas/bs_coop/results/raw/alpha_sweep_summary.csv), the gap-to-full-neighborhood curves for `alpha in {3.0, 3.6, 4.2}` still shrink rapidly with `rho`.
 
-At `rho = 5`, the absolute mean gaps are:
+At `rho = 5`, the absolute gaps to the full-neighborhood reference are:
 
-- `alpha = 3.0`: `0.2695`
-- `alpha = 3.6`: `0.1361`
-- `alpha = 4.2`: `0.1064`
+- `alpha = 3.0`: `0.3013`
+- `alpha = 3.6`: `0.1026`
+- `alpha = 4.2`: `0.1400`
 
-Using the corresponding mean global objective level, the relative gaps at `rho = 5` are approximately:
+Using the corresponding full-neighborhood objective levels, the relative gaps at `rho = 5` are approximately:
 
-- `alpha = 3.0`: `0.35%`
-- `alpha = 3.6`: `0.14%`
+- `alpha = 3.0`: `0.29%`
+- `alpha = 3.6`: `0.08%`
 - `alpha = 4.2`: `0.09%`
 
 From [results/raw/alpha_sweep_fit.csv](/Users/yosia/Desktop/ideas/bs_coop/results/raw/alpha_sweep_fit.csv), the empirical log-log slopes are:
 
-- `alpha = 3.0`: `-2.3673`
-- `alpha = 3.6`: `-2.9628`
-- `alpha = 4.2`: `-3.1814`
+- `alpha = 3.0`: `-2.0845`
+- `alpha = 3.6`: `-2.7812`
+- `alpha = 4.2`: `-2.8005`
 
 This supports the qualitative theorem prediction that stronger spatial decay makes locality more effective.
 
 ## 8. Honest Caveat
 
 The finite-iteration, nonconvex algorithm does **not** have to improve monotonically with `rho` on every single random instance.
+
+The current multi-stream MIMO alpha sweep also uses only `1` Monte Carlo trial per `alpha` in the default configuration to keep the full repository run practical, so those alpha-slope numbers should be treated as exploratory rather than final.
 
 What the current experiments support is the stronger and more useful claim:
 

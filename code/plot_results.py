@@ -39,16 +39,16 @@ def plot_sum_rate(summary_rows: list[dict]) -> None:
 
 
 def plot_gap(summary_rows: list[dict]) -> None:
-    filtered = [row for row in summary_rows if row["rho_label"] != "global"]
+    filtered = [row for row in summary_rows if row["rho_label"] not in {"global", "bd-dual"}]
     labels = [row["rho_label"] for row in filtered]
-    means = [float(row["mean_gap_to_global"]) for row in filtered]
+    means = [float(row["mean_gap_to_full_neighborhood"]) for row in filtered]
 
     fig, ax = plt.subplots(figsize=(6.0, 3.6))
     ax.plot(labels, means, marker="s", linewidth=2.0, color="#C92A2A")
     ax.set_xlabel("Cooperation setting")
-    ax.set_ylabel("Gap to global benchmark")
-    ax.set_title("Optimality gap versus radius")
-    save_figure(fig, "gap_to_global_vs_rho")
+    ax.set_ylabel("Gap to full-neighborhood reference")
+    ax.set_title("Reference gap versus radius")
+    save_figure(fig, "gap_to_full_neighborhood_vs_rho")
     plt.close(fig)
 
 
@@ -58,7 +58,7 @@ def plot_runtime(summary_rows: list[dict]) -> None:
         grouped.setdefault(row["label"], []).append((int(row["num_bs"]), float(row["mean_runtime_sec"])))
 
     fig, ax = plt.subplots(figsize=(6.0, 3.6))
-    colors = {"localized-rho1": "#2B8A3E", "global": "#5F3DC4"}
+    colors = {"localized-rho1": "#2B8A3E", "full-neighborhood": "#0B7285", "global-bd-dual": "#5F3DC4"}
     for label, pairs in grouped.items():
         pairs.sort(key=lambda item: item[0])
         xs = [item[0] for item in pairs]
@@ -87,14 +87,14 @@ def plot_signaling(summary_rows: list[dict]) -> None:
 
 def plot_locality_scaling(summary_rows: list[dict]) -> None:
     rhos = [float(row["rho"]) for row in summary_rows]
-    gaps = [float(row["mean_gap_to_global"]) for row in summary_rows]
+    gaps = [float(row["mean_gap_to_full_neighborhood"]) for row in summary_rows]
     reference = [gaps[0] * (rho / rhos[0]) ** (2.0 - DEFAULT_CONFIG.path_loss_exponent) for rho in rhos]
 
     fig, ax = plt.subplots(figsize=(6.0, 3.8))
     ax.loglog(rhos, gaps, marker="o", linewidth=2.0, color="#C2255C", label="Measured true gap")
     ax.loglog(rhos, reference, linestyle="--", linewidth=2.0, color="#364FC7", label=r"Reference $\rho^{2-\alpha}$")
     ax.set_xlabel(r"Cooperation radius $\rho$")
-    ax.set_ylabel("Gap to global benchmark")
+    ax.set_ylabel("Gap to full-neighborhood reference")
     ax.set_title("Locality scaling on the 37-BS study")
     ax.legend(frameon=True)
     save_figure(fig, "locality_gap_scaling")
@@ -105,7 +105,7 @@ def plot_alpha_sweep(summary_rows: list[dict]) -> None:
     grouped: dict[str, list[tuple[float, float]]] = {}
     for row in summary_rows:
         label = rf"$\alpha={float(row['alpha']):.1f}$"
-        grouped.setdefault(label, []).append((float(row["rho"]), float(row["mean_gap_to_global"])))
+        grouped.setdefault(label, []).append((float(row["rho"]), float(row["mean_gap_to_full_neighborhood"])))
 
     fig, ax = plt.subplots(figsize=(6.0, 3.8))
     colors = ["#1D4ED8", "#C2255C", "#2B8A3E"]
@@ -115,7 +115,7 @@ def plot_alpha_sweep(summary_rows: list[dict]) -> None:
         ys = [item[1] for item in pairs]
         ax.loglog(xs, ys, marker="o", linewidth=2.0, color=color, label=label)
     ax.set_xlabel(r"Cooperation radius $\rho$")
-    ax.set_ylabel("Gap to global benchmark")
+    ax.set_ylabel("Gap to full-neighborhood reference")
     ax.set_title("Effect of path-loss decay on locality")
     ax.legend(frameon=True)
     save_figure(fig, "alpha_sweep_gap_scaling")

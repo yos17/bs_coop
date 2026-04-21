@@ -7,12 +7,14 @@ from math import isinf
 
 from channels import build_network
 from config import DEFAULT_CONFIG, FIG_RESULTS_DIR, PAPER_FIG_DIR, RAW_RESULTS_DIR
-from global_benchmark import run_global_benchmark
+from global_benchmark import run_full_neighborhood_reference, run_global_benchmark
 from localized_algorithm import run_ldbpa
 from utils import ensure_dir, save_csv
 
 
 def format_rho_label(rho: float, label: str) -> str:
+    if label == "global-bd-dual":
+        return "bd-dual"
     if label == "non-cooperative":
         return "non-coop"
     if isinf(rho):
@@ -51,9 +53,10 @@ def run_radius_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
 
     for trial in range(config.monte_carlo_trials):
         network = build_network(config, ring_radius=config.ring_radius, users_per_bs=config.users_per_bs, seed=config.seed + trial)
-        global_result = run_global_benchmark(network, config)
+        bd_dual_result = run_global_benchmark(network, config)
+        full_reference = run_full_neighborhood_reference(network, config)
 
-        method_results = [global_result]
+        method_results = [bd_dual_result, full_reference]
         for label, rho in methods:
             method_results.append(
                 run_ldbpa(
@@ -68,7 +71,8 @@ def run_radius_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
                 )
             )
 
-        global_objective = global_result["objective"]
+        full_reference_objective = full_reference["objective"]
+        bd_dual_objective = bd_dual_result["objective"]
         for result in method_results:
             rho = result["rho"]
             row = {
@@ -80,7 +84,8 @@ def run_radius_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
                 "runtime_sec": result["runtime_sec"],
                 "signaling_messages": result["signaling_messages"],
                 "iterations": result["iterations"],
-                "gap_to_global": global_objective - result["objective"],
+                "gap_to_full_neighborhood": full_reference_objective - result["objective"],
+                "gap_to_bd_dual": bd_dual_objective - result["objective"],
             }
             radius_rows.append(row)
 
@@ -100,9 +105,9 @@ def run_radius_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
     summary = summarize(
         rows=radius_rows,
         group_keys=["rho_label"],
-        metric_keys=["weighted_sum_rate", "runtime_sec", "signaling_messages", "iterations", "gap_to_global"],
+        metric_keys=["weighted_sum_rate", "runtime_sec", "signaling_messages", "iterations", "gap_to_full_neighborhood", "gap_to_bd_dual"],
     )
-    order = {"non-coop": 0, "rho=1": 1, "rho=2": 2, "rho=3": 3, "global": 4}
+    order = {"non-coop": 0, "rho=1": 1, "rho=2": 2, "rho=3": 3, "global": 4, "bd-dual": 5}
     summary.sort(key=lambda item: order[item["rho_label"]])
     return radius_rows, summary, convergence_rows
 
@@ -116,16 +121,17 @@ def run_runtime_scaling(config) -> tuple[list[dict], list[dict]]:
             localized = run_ldbpa(
                 network,
                 rho=1.0,
-                max_iters=max(20, config.max_iters // 2),
+                max_iters=config.max_iters,
                 tol=config.tol,
                 lambda_step=config.lambda_step,
                 price_step=config.price_step,
                 interference_budget_scale=config.interference_budget_scale,
                 label="localized-rho1",
             )
-            global_result = run_global_benchmark(network, config)
+            full_reference = run_full_neighborhood_reference(network, config)
+            bd_dual_result = run_global_benchmark(network, config)
 
-            for result in (localized, global_result):
+            for result in (localized, full_reference, bd_dual_result):
                 runtime_rows.append(
                     {
                         "trial": trial,
@@ -161,8 +167,10 @@ def run_locality_scaling(config) -> tuple[list[dict], list[dict], list[dict]]:
             users_per_bs=config.locality_users_per_bs,
             seed=seed,
         )
-        global_result = run_global_benchmark(network, config)
-        global_objective = global_result["objective"]
+        full_reference = run_full_neighborhood_reference(network, config)
+        bd_dual_result = run_global_benchmark(network, config)
+        full_reference_objective = full_reference["objective"]
+        bd_dual_objective = bd_dual_result["objective"]
 
         for rho in config.locality_rhos:
             result = run_ldbpa(
@@ -181,7 +189,8 @@ def run_locality_scaling(config) -> tuple[list[dict], list[dict], list[dict]]:
                     "num_bs": network["num_bs"],
                     "rho": rho,
                     "weighted_sum_rate": result["objective"],
-                    "gap_to_global": global_objective - result["objective"],
+                    "gap_to_full_neighborhood": full_reference_objective - result["objective"],
+                    "gap_to_bd_dual": bd_dual_objective - result["objective"],
                     "runtime_sec": result["runtime_sec"],
                     "iterations": result["iterations"],
                 }
@@ -190,11 +199,11 @@ def run_locality_scaling(config) -> tuple[list[dict], list[dict], list[dict]]:
     summary = summarize(
         rows=locality_rows,
         group_keys=["rho"],
-        metric_keys=["weighted_sum_rate", "gap_to_global", "runtime_sec", "iterations"],
+        metric_keys=["weighted_sum_rate", "gap_to_full_neighborhood", "gap_to_bd_dual", "runtime_sec", "iterations"],
     )
     summary.sort(key=lambda item: float(item["rho"]))
 
-    empirical_slope = fit_loglog_slope(summary, "rho", "mean_gap_to_global")
+    empirical_slope = fit_loglog_slope(summary, "rho", "mean_gap_to_full_neighborhood")
     fit_rows = [
         {
             "empirical_loglog_slope": empirical_slope,
@@ -220,8 +229,10 @@ def run_alpha_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
                 users_per_bs=config.locality_users_per_bs,
                 seed=seed,
             )
-            global_result = run_global_benchmark(network, local_config)
-            global_objective = global_result["objective"]
+            full_reference = run_full_neighborhood_reference(network, local_config)
+            bd_dual_result = run_global_benchmark(network, local_config)
+            full_reference_objective = full_reference["objective"]
+            bd_dual_objective = bd_dual_result["objective"]
 
             for rho in config.locality_rhos:
                 result = run_ldbpa(
@@ -241,14 +252,15 @@ def run_alpha_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
                         "rho": rho,
                         "num_bs": network["num_bs"],
                         "weighted_sum_rate": result["objective"],
-                        "gap_to_global": global_objective - result["objective"],
+                        "gap_to_full_neighborhood": full_reference_objective - result["objective"],
+                        "gap_to_bd_dual": bd_dual_objective - result["objective"],
                     }
                 )
 
     summary = summarize(
         rows=alpha_rows,
         group_keys=["alpha", "rho"],
-        metric_keys=["weighted_sum_rate", "gap_to_global"],
+        metric_keys=["weighted_sum_rate", "gap_to_full_neighborhood", "gap_to_bd_dual"],
     )
     summary.sort(key=lambda item: (float(item["alpha"]), float(item["rho"])))
     fit_rows = []
@@ -257,7 +269,7 @@ def run_alpha_sweep(config) -> tuple[list[dict], list[dict], list[dict]]:
         fit_rows.append(
             {
                 "alpha": alpha,
-                "empirical_loglog_slope": fit_loglog_slope(alpha_summary, "rho", "mean_gap_to_global"),
+                "empirical_loglog_slope": fit_loglog_slope(alpha_summary, "rho", "mean_gap_to_full_neighborhood"),
                 "predicted_upper_bound_exponent": 2.0 - alpha,
                 "ring_radius": config.locality_ring_radius,
                 "num_bs": 1 + 3 * config.locality_ring_radius * (config.locality_ring_radius + 1),
@@ -282,7 +294,18 @@ def main() -> None:
     save_csv(
         RAW_RESULTS_DIR / "radius_sweep_trials.csv",
         radius_rows,
-        ["trial", "label", "rho_numeric", "rho_label", "weighted_sum_rate", "runtime_sec", "signaling_messages", "iterations", "gap_to_global"],
+        [
+            "trial",
+            "label",
+            "rho_numeric",
+            "rho_label",
+            "weighted_sum_rate",
+            "runtime_sec",
+            "signaling_messages",
+            "iterations",
+            "gap_to_full_neighborhood",
+            "gap_to_bd_dual",
+        ],
     )
     save_csv(
         RAW_RESULTS_DIR / "radius_sweep_summary.csv",
@@ -299,8 +322,10 @@ def main() -> None:
             "std_signaling_messages",
             "mean_iterations",
             "std_iterations",
-            "mean_gap_to_global",
-            "std_gap_to_global",
+            "mean_gap_to_full_neighborhood",
+            "std_gap_to_full_neighborhood",
+            "mean_gap_to_bd_dual",
+            "std_gap_to_bd_dual",
         ],
     )
     save_csv(
@@ -321,7 +346,7 @@ def main() -> None:
     save_csv(
         RAW_RESULTS_DIR / "locality_scaling_trials.csv",
         locality_rows,
-        ["trial", "num_bs", "rho", "weighted_sum_rate", "gap_to_global", "runtime_sec", "iterations"],
+        ["trial", "num_bs", "rho", "weighted_sum_rate", "gap_to_full_neighborhood", "gap_to_bd_dual", "runtime_sec", "iterations"],
     )
     save_csv(
         RAW_RESULTS_DIR / "locality_scaling_summary.csv",
@@ -330,8 +355,10 @@ def main() -> None:
             "rho",
             "mean_weighted_sum_rate",
             "std_weighted_sum_rate",
-            "mean_gap_to_global",
-            "std_gap_to_global",
+            "mean_gap_to_full_neighborhood",
+            "std_gap_to_full_neighborhood",
+            "mean_gap_to_bd_dual",
+            "std_gap_to_bd_dual",
             "mean_runtime_sec",
             "std_runtime_sec",
             "mean_iterations",
@@ -354,7 +381,7 @@ def main() -> None:
     save_csv(
         RAW_RESULTS_DIR / "alpha_sweep_trials.csv",
         alpha_rows,
-        ["trial", "alpha", "rho", "num_bs", "weighted_sum_rate", "gap_to_global"],
+        ["trial", "alpha", "rho", "num_bs", "weighted_sum_rate", "gap_to_full_neighborhood", "gap_to_bd_dual"],
     )
     save_csv(
         RAW_RESULTS_DIR / "alpha_sweep_summary.csv",
@@ -365,8 +392,10 @@ def main() -> None:
             "num_bs",
             "mean_weighted_sum_rate",
             "std_weighted_sum_rate",
-            "mean_gap_to_global",
-            "std_gap_to_global",
+            "mean_gap_to_full_neighborhood",
+            "std_gap_to_full_neighborhood",
+            "mean_gap_to_bd_dual",
+            "std_gap_to_bd_dual",
         ],
     )
     save_csv(

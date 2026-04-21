@@ -154,7 +154,7 @@ Contribution bullets:
 
 Text to add to introduction:
 
-Early work on distributed base-station cooperation considered structured linear precoding combined with distributed resource allocation. In particular, Jungnickel et al. proposed block-diagonalization together with dual decomposition for cooperative multi-cell transmission under local power constraints. While that framework demonstrated the potential of distributed coordination, it relied on fixed interference-nulling precoders and did not characterize how localized cooperation approaches the fully coordinated optimum as cooperation neighborhoods expand. The present work builds directly on that direction by enabling localized joint beamforming and power control with asymptotic optimality guarantees.
+Early work on distributed base-station cooperation considered structured linear precoding combined with distributed resource allocation. In particular, Hadisusanto et al. proposed block-diagonalization together with dual decomposition for cooperative multi-cell transmission under local power constraints. While that framework demonstrated the potential of distributed coordination, it relied on fixed interference-nulling precoders and did not characterize how localized cooperation approaches the fully coordinated optimum as cooperation neighborhoods expand. The present work builds directly on that direction by enabling localized joint beamforming and power control with asymptotic optimality guarantees.
 
 ## System Model Content
 
@@ -369,11 +369,11 @@ optimization + locality scaling theorem
 
 Text to add to related work:
 
-One of the earliest distributed formulations of cooperative base-station transmission employed block-diagonalization precoding together with dual decomposition for distributed power allocation under per-antenna constraints [Jungnickel08]. That work established an important decomposition principle for cooperative cellular systems. In contrast, the present paper removes the need for fixed block-diagonalization structures and develops a localized beamforming architecture whose performance provably approaches the globally coordinated benchmark as the cooperation radius increases.
+One of the earliest distributed formulations of cooperative base-station transmission employed block-diagonalization precoding together with dual decomposition for distributed power allocation under per-antenna constraints [Jungnickel08]. That work by Hadisusanto et al. established an important decomposition principle for cooperative cellular systems. In contrast, the present paper removes the need for fixed block-diagonalization structures and develops a localized beamforming architecture whose performance provably approaches the globally coordinated benchmark as the cooperation radius increases.
 
 Text to add to contributions:
 
-This paper generalizes the distributed decomposition philosophy of Jungnickel08 from fixed precoding plus power loading to fully adaptive localized joint beamforming and power allocation.
+This paper generalizes the distributed decomposition philosophy introduced by Hadisusanto et al. [Jungnickel08] from fixed precoding plus power loading to fully adaptive localized joint beamforming and power allocation.
 
 ## Simulation Section Content
 

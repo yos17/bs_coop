@@ -55,16 +55,17 @@ def generate_channels(
     user_positions: np.ndarray,
     bs_positions: np.ndarray,
     antenna_count: int,
+    receive_antenna_count: int,
     path_loss_exponent: float,
     rng: np.random.Generator,
 ) -> tuple[np.ndarray, np.ndarray]:
     distances = np.linalg.norm(user_positions[:, None, :] - bs_positions[None, :, :], axis=2)
     path_loss = np.power(1.0 + distances, -path_loss_exponent)
     fading = (
-        rng.standard_normal((user_positions.shape[0], bs_positions.shape[0], antenna_count))
-        + 1j * rng.standard_normal((user_positions.shape[0], bs_positions.shape[0], antenna_count))
+        rng.standard_normal((user_positions.shape[0], bs_positions.shape[0], receive_antenna_count, antenna_count))
+        + 1j * rng.standard_normal((user_positions.shape[0], bs_positions.shape[0], receive_antenna_count, antenna_count))
     ) / math.sqrt(2.0)
-    channels = np.sqrt(path_loss)[..., None] * fading
+    channels = np.sqrt(path_loss)[..., None, None] * fading
     return channels.astype(np.complex128), path_loss
 
 
@@ -85,6 +86,7 @@ def build_network(config, ring_radius: int | None = None, users_per_bs: int | No
         user_positions=user_positions,
         bs_positions=bs_positions,
         antenna_count=config.antenna_count,
+        receive_antenna_count=config.receive_antenna_count,
         path_loss_exponent=config.path_loss_exponent,
         rng=rng,
     )
@@ -101,6 +103,8 @@ def build_network(config, ring_radius: int | None = None, users_per_bs: int | No
         "power_limits": np.full(num_bs, config.bs_power, dtype=float),
         "noise_power": float(config.noise_power),
         "antenna_count": int(config.antenna_count),
+        "receive_antenna_count": int(config.receive_antenna_count),
+        "streams_per_user": int(config.streams_per_user),
         "num_bs": int(num_bs),
         "num_users": int(num_users),
         "ring_radius": int(ring),
