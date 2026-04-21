@@ -119,54 +119,56 @@ This is the clean matrix-valued successor to the old dual power-loading logic.
 
 Let
 
-$$
+```math
 F^\star = \max_W F(W).
-$$
+```
 
 Let `W_rho^*` be any optimizer of the optimistic localized surrogate:
 
-$$
+```math
 W_\rho^\star \in \arg\max_W \widetilde{F}^{(\rho)}(W).
-$$
+```
 
 Define the **true** objective achieved by that localized optimizer:
 
-$$
+```math
 \widehat{F}_\rho^\star := F(W_\rho^\star).
-$$
+```
 
 The cleanest statement separates the exact finite-network identity from the asymptotic decay bound.
 
 ### 4.1 Theorem: Finite-Network Exact Equality
 
+**Theorem 1 (Finite-Network Exact Equality).**
+
 Let the set of base stations be finite and define the network diameter
 
-$$
+```math
 D_{\mathrm{net}} := \max_{b,c \in \mathcal{B}} d(b,c).
-$$
+```
 
 Then for every `rho >= D_net`, the localized problem is exactly the global problem.
 
-#### Proof
+**Proof.**
 
 If `rho >= D_net`, then for every base station `b`,
 
-$$
+```math
 \mathcal{C}_b(\rho) = \mathcal{B}.
-$$
+```
 
 Therefore no interference terms are omitted, so for every feasible beamformer collection `W`,
 
-$$
+```math
 \widetilde{F}^{(\rho)}(W) = F(W).
-$$
+```
 
 Since the feasible set is also unchanged, the localized and global optimization problems are identical. Hence:
 
-$$
+```math
 \widehat{F}_\rho^\star = F^\star
 \qquad \text{for all } \rho \ge D_{\mathrm{net}}.
-$$
+```
 
 This is the rigorous version of the statement
 
@@ -178,72 +180,74 @@ Once every neighborhood contains every base station, the localized model has the
 
 Because the network is finite, `D_net < infinity`. Therefore there exists a finite threshold `rho_0 = D_net` such that
 
-$$
+```math
 \widehat{F}_\rho^\star = F^\star
 \qquad \text{for all } \rho \ge \rho_0.
-$$
+```
 
 Hence
 
-$$
+```math
 \lim_{\rho \to \infty} \widehat{F}_\rho^\star = F^\star.
-$$
+```
 
 So on a finite network, exact equality happens before the limit: once `rho` reaches the network diameter, local cooperation and global cooperation are literally the same thing.
 
 ### 4.3 Theorem: Asymptotic Decay Bound For Expanding Networks
 
+**Theorem 2 (Asymptotic Decay Bound).**
+
 Assume:
 
 1. Path-loss decay:
 
-$$
+```math
 \|h_{k,b}\|^2 \le C_h (1 + d(k,b))^{-\alpha},
 \qquad \alpha > 2.
-$$
+```
 
 2. Bounded feasible beamformers:
 
-$$
+```math
 \sum_{u \in U_b} \|w_{b,u}\|^2 \le P_b \le P_{\max}.
-$$
+```
 
 3. Bounded shell growth in 2D:
 the number of BSs at distance in `[m, m+1)` is at most proportional to `1 + m`.
 
 4. Positive noise floor:
 
-$$
+```math
 \sigma_k^2 \ge \sigma_{\min}^2 > 0.
-$$
+```
 
 Then there exists a constant `K > 0` such that
 
-$$
+```math
 0 \le F^\star - \widehat{F}_\rho^\star \le K \rho^{2-\alpha}.
-$$
+```
 
 Hence
 
-$$
+```math
 \widehat{F}_\rho^\star \to F^\star
 \qquad \text{as } \rho \to \infty.
-$$
+```
 
 If the distributed algorithm returns `W_rho^dagger` with local surrogate gap
 
-$$
+```math
 \widetilde{F}^{(\rho)}(W_\rho^\star)
 - \widetilde{F}^{(\rho)}(W_\rho^\dagger)
 \le \delta_\rho,
-$$
+```
 
 then
 
-$$
+```math
 0 \le F^\star - F(W_\rho^\dagger)
 \le K \rho^{2-\alpha} + \delta_\rho.
-$$
+```
 
 So if `delta_rho -> 0`, then the algorithmic solution also approaches the global optimum.
 
@@ -253,25 +257,25 @@ The same logic carries over to the fully MIMO model used in the 2008 paper. Let 
 
 The omitted far-field term is now an interference covariance tail,
 
-$$
+```math
 \Delta \Sigma_k^{(\rho)}(V)
 =
 \sum_{c \notin \mathcal{C}_{b(k)}(\rho)}
 \sum_u
 H_{k,c} V_{c,u} V_{c,u}^H H_{k,c}^H.
-$$
+```
 
 If the channel matrices satisfy the same spatial decay bound in Frobenius norm and the feasible beamformers are uniformly bounded, then
 
-$$
+```math
 \|\Delta \Sigma_k^{(\rho)}(V)\|_2 = O(\rho^{2-\alpha}).
-$$
+```
 
 The user-rate expression in the MIMO case,
 
-$$
+```math
 R_k(V) = \log_2 \det \left(I + S_k(V)\Sigma_k(V)^{-1}\right),
-$$
+```
 
 is still a continuous monotone function of the interference covariance. So the finite-network equality result and the asymptotic `O(\rho^{2-\alpha})` gap bound both extend to the multi-stream MIMO setting.
 
@@ -283,7 +287,7 @@ The proof is straightforward once the optimistic surrogate is handled correctly.
 
 By Cauchy-Schwarz and the power bound,
 
-$$
+```math
 \Delta I_k^{(\rho)}(W)
 \le
 \sum_{c \notin C_{b(k)}(\rho)}
@@ -293,52 +297,52 @@ $$
 C_h P_{\max}
 \sum_{c \notin C_{b(k)}(\rho)}
 (1 + d(k,c))^{-\alpha}.
-$$
+```
 
 In 2D, bounded shell growth turns this into
 
-$$
+```math
 \Delta I_k^{(\rho)}(W) = O(\rho^{2-\alpha}).
-$$
+```
 
 ### 5.2 Objective perturbation
 
 Dropping far-field interference can only increase the surrogate rate, so
 
-$$
+```math
 0 \le \widetilde{R}_k^{(\rho)}(W) - R_k(W).
-$$
+```
 
 Using the noise floor,
 
-$$
+```math
 \widetilde{R}_k^{(\rho)}(W) - R_k(W)
 \le
 \frac{\Delta I_k^{(\rho)}(W)}{\ln 2 \, \sigma_{\min}^2}.
-$$
+```
 
 Therefore, uniformly over feasible `W`,
 
-$$
+```math
 0 \le \widetilde{F}^{(\rho)}(W) - F(W) \le K_F \rho^{2-\alpha}.
-$$
+```
 
 ### 5.3 Compare the two optimizers
 
 Since `W_rho^*` maximizes the surrogate,
 
-$$
+```math
 F^\star = F(W^\star)
 \le \widetilde{F}^{(\rho)}(W^\star)
 \le \widetilde{F}^{(\rho)}(W_\rho^\star)
 \le F(W_\rho^\star) + K_F \rho^{2-\alpha}.
-$$
+```
 
 So
 
-$$
+```math
 0 \le F^\star - \widehat{F}_\rho^\star \le K_F \rho^{2-\alpha}.
-$$
+```
 
 That is the theorem.
 
@@ -346,15 +350,15 @@ That is the theorem.
 
 If you define
 
-$$
+```math
 F_\rho^\star := \max_W F^{(\rho)}(W)
-$$
+```
 
 using a surrogate that simply drops far-field interference, then `F_rho^*` is generally **optimistic**. In that formulation, the statement
 
-$$
+```math
 0 \le F^\star - F_\rho^\star
-$$
+```
 
 does not hold in general.
 
