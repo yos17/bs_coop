@@ -68,4 +68,4 @@ Small and medium-sized neighborhoods should recover most of the global coordinat
 
 If you use this repository, cite the paper draft in this repository and the foundational predecessor work:
 
-- Volker Jungnickel et al., "Distributed Base Station Cooperation via Block-Diagonalization and Dual-Decomposition," Proc. IEEE Globecom, 2008.
+- Yosia Hadisusanto et al., "Distributed Base Station Cooperation via Block-Diagonalization and Dual-Decomposition," Proc. IEEE Globecom, 2008.

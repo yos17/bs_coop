@@ -22,7 +22,7 @@ This repository should be publication-grade.
 
 The new paper must explicitly cite the following prior paper as foundational motivation and predecessor work:
 
-Volker Jungnickel et al.,
+Yosia Hadisusanto et al.,
 "Distributed Base Station Cooperation via Block-Diagonalization and Dual-Decomposition",
 2008.
 
@@ -461,7 +461,7 @@ Use random seeds for reproducibility.
 
 ```bibtex
 @inproceedings{Jungnickel08,
-  author    = {Volker Jungnickel and others},
+  author    = {Yosia Hadisusanto and others},
   title     = {Distributed Base Station Cooperation via Block-Diagonalization and Dual-Decomposition},
   booktitle = {Proc. IEEE Globecom},
   year      = {2008}
